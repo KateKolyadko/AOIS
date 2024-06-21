@@ -1,3 +1,6 @@
+from operator import itemgetter
+
+
 class SKDNF:
     def __init__(self, formula_sdnf):
         print(formula_sdnf)
@@ -9,11 +12,11 @@ class SKDNF:
     def split_formula(self):
         if "|" in self._formula_sdnf:
             terms = self._formula_sdnf.split('|')
-            print("sdnf formula")
+            print("Формула СДНФ")
             self.is_dnf = True
         else:
             terms = self._formula_sdnf.split('&')
-            print("sknf formula")
+            print("Формула СКНФ")
 
         for term in terms:
             sets = list(term.strip('()'))
@@ -128,7 +131,9 @@ class SKDNF:
             print(start_set, non_combinable_set)
         glued_formulas = non_combinable_set + start_set
         result = self.check_extra_elements_calculation_method(glued_formulas)
+        result = sorted(result, key=lambda x: (sorted(x), len(x)), reverse=True)
         print("result", result)
+        return result
 
     def build_occurrence_table(self, implicants):
         table = [[0 for _ in range(len(self.split_sdnf))] for _ in range(len(implicants))]
@@ -137,7 +142,8 @@ class SKDNF:
             for j, col in enumerate(self.split_sdnf):
                 if all(elem in col or ('!' + elem[1:]) in col for elem in row):
                     table[i][j] = 1
-        print(table)
+        for i in table:
+            print(i)
 
         return table
 
@@ -176,8 +182,9 @@ class SKDNF:
         table = self.build_occurrence_table(glued_formulas)
         indices = self.find_min_cover(table)
         result = [glued_formulas[i] for i in indices]
-
+        result = sorted(result, key=lambda x: (sorted(x), len(x)), reverse=True)
         print("result", result)
+        return result
 
     @staticmethod
     def print_karnaugh_map(table, row, col):
@@ -255,7 +262,7 @@ class SKDNF:
             not_set_columns -= set(i for i, val in enumerate(matrix[best_row]) if val == 1)
         return selected_rows
 
-    def minimize_settlement_karno(self):
+    def minimize_karno(self):
         start_set = self.split_sdnf
         non_combinable_set = []
         for i in range(0, len(self.split_sdnf[0]) - 1):
@@ -268,7 +275,9 @@ class SKDNF:
         table = self.build_karno_table(formulas)
         indices = self.find_area(table)
         result = [formulas[i] for i in indices]
+        result = sorted(result, key=lambda x: (sorted(x), len(x)), reverse=True)
         print(result)
+        return result
 
     def minimize(self):
         if self.is_dnf:
@@ -276,13 +285,13 @@ class SKDNF:
         else:
             col, row, karnaugh_map = self.generate_karnaugh_map_knf()
         self.print_karnaugh_map(karnaugh_map, row, col)
-        self.minimize_settlement_karno()
+        self.minimize_karno()
 
 
 
 
 
-t = SKDNF("(!a!bc)&(!abc)&(a!b!c)&(a!bc)&(ab!c)&(abc)")
+t = SKDNF("(!a!bc)|(!abc)|(a!bc)|(ab!c)")
 print("Расчетный метод")
 t.minimize_calculation_method()
 print("Расчетно-табличный метод")

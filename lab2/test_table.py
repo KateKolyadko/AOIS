@@ -17,8 +17,8 @@ class TestTruthTable(unittest.TestCase):
         self.assertEqual(t.determine_value("(1|1)"), 1)
         self.assertEqual(t.determine_value("(0~0)"), 1)
         self.assertEqual(t.determine_value("(1~1)"), 1)
-        self.assertEqual(t.determine_value("!0"), 1)
-        self.assertEqual(t.determine_value("!1"), 0)
+        self.assertEqual(t.determine_value("(!0)"), 1)
+        self.assertEqual(t.determine_value("(!1)"), 0)
 
     def test_table(self):
         t = TruthTable("(a->b)")

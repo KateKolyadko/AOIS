@@ -61,44 +61,39 @@ class TruthTable:
         letters = re.findall(r'[a-zA-Z]', self._formula)
         self.operations = list(set(letters))
         self.operations.sort()
+        used_parentheses = []
         begin = 0
         for i, element in enumerate(self._formula):
-            if element == "(" or element == "!":
+            if element == "(":
                 begin = i
-            elif element == ")" or (self._formula[begin] == "!" and element.isalpha()):
+            elif element == ")":
+                used_parentheses.append(begin)
                 self.operations.append(self._formula[begin:i + 1])
                 for j in range(begin - 1, -1, -1):
-                    if self._formula[j] == "!" or self._formula[j] == "(":
-                        begin = j
-                        break
-            elif self._formula[begin] == "!" and self._formula[begin + 1] == "(" and self._formula[i - 1] == ")":
-                self.operations.append(self._formula[begin:i])
-                for j in range(begin - 1, -1, -1):
-                    if self._formula[j] == "(" or self._formula[j] == "!":
+                    if self._formula[j] == "(" and j not in used_parentheses:
                         begin = j
                         break
 
     def determine_value(self, counting_expression):
-        if counting_expression.startswith("!"):
-            value1 = int(counting_expression[1])
-            return self.logical_not(value1)
-        elif counting_expression.startswith("(") and counting_expression.endswith(")"):
-            counting_expression = counting_expression[1:-1].strip()
-            value1 = int(counting_expression[0])
-            if len(counting_expression) == 3 and (counting_expression[1] == "&" or counting_expression[1] == "|" or
+        counting_expression = counting_expression[1:-1].strip()
+        if len(counting_expression) == 3 and (counting_expression[1] == "&" or counting_expression[1] == "|" or
                                                   counting_expression[1] == "~"):
-                value2 = int(counting_expression[2])
-                if counting_expression[1] == "&":
-                    return self.logical_and(value1, value2)
-                elif counting_expression[1] == "|":
-                    return self.logical_or(value1, value2)
-                elif counting_expression[1] == "~":
-                    return self.equivalence(value1, value2)
-            elif len(counting_expression) == 4 and counting_expression[1:3] == "->":
-                value2 = int(counting_expression[3])
-                return self.implication(value1, value2)
-            else:
-                raise ValueError("Неверный формат входной строки:")
+            value1 = int(counting_expression[0])
+            value2 = int(counting_expression[2])
+            if counting_expression[1] == "&":
+                return self.logical_and(value1, value2)
+            elif counting_expression[1] == "|":
+                return self.logical_or(value1, value2)
+            elif counting_expression[1] == "~":
+                return self.equivalence(value1, value2)
+        elif len(counting_expression) == 4 and counting_expression[1:3] == "->":
+            value1 = int(counting_expression[0])
+            value2 = int(counting_expression[3])
+            return self.implication(value1, value2)
+        elif len(counting_expression) == 2:
+            return self.logical_not(int(counting_expression[1]))
+        else:
+            raise ValueError("Неверный формат входной строки:")
 
     def count(self):
         variables = re.findall(r'[a-zA-Z]', self._formula)
@@ -188,7 +183,7 @@ class TruthTable:
         return number, index
 
 
-t = TruthTable("(a|(b&!c))")
+t = TruthTable("((a|(!b))&(!c))")
 print("SKNF")
 t.create_sknf()
 print("SDNF")

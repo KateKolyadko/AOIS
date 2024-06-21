@@ -1,61 +1,61 @@
 class HashTable:
-    def __init__(self, size=10):
-        self.size = size
-        self.buckets = [[] for _ in range(size)]
+    def __init__(self):
+        self.size = 10
+        self.hash_table = [[] for _ in range(self.size)]
 
-    def hash(self, key):
-        return hash(key) % self.size
+    def hashing(self, hash_key):
+        return hash(hash_key) % self.size
 
-    def insert(self, key, value):
-        index = self.hash(key)
+    def insert(self, hash_key, value):
+        i = self.hashing(hash_key)
         step = 1
-        while self.buckets[index]:
-            if self.buckets[index][0] == key:
-                self.buckets[index][1] = value  
+        while self.hash_table[i]:
+            if self.hash_table[i][0] == hash_key:
+                self.hash_table[i][1] = value
                 return
-            index = (index + step**2) % self.size  
+            index = (i + step**2) % self.size
             step += 1
-        self.buckets[index] = [key, value]
+        self.hash_table[i] = [hash_key, value]
 
-    def get(self, key):
-        index = self.hash(key)
+    def get_by_key(self, hash_key):
+        i = self.hashing(hash_key)
         step = 1
-        while self.buckets[index]:
-            if self.buckets[index][0] == key:
-                return self.buckets[index][1]
-            index = (index + step**2) % self.size
+        while self.hash_table[i]:
+            if self.hash_table[i][0] == hash_key:
+                return self.hash_table[i][1]
+            i = (i + step**2) % self.size
             step += 1
-        raise KeyError(key)
+        raise KeyError(hash_key)
 
-    def delete(self, key):
-        index = self.hash(key)
-        step = 1
-        while self.buckets[index]:
-            if self.buckets[index][0] == key:
-                self.buckets[index] = []
+    def delete_by_key(self, hash_key):
+        i = self.hashing(hash_key)
+        j = 1
+        while self.hash_table[i]:
+            if self.hash_table[i][0] == hash_key:
+                self.hash_table[i] = []
                 return
-            index = (index + step**2) % self.size  # Квадратичный поиск
-            step += 1
-        raise KeyError(key)
+            i = (i + j**2) % self.size
+            j += 1
+        raise KeyError(hash_key)
 
     def __len__(self):
-        return sum(len(bucket) for bucket in self.buckets if bucket)
+        return sum(len(table_row) for table_row in self.hash_table if table_row)
 
-    def clear(self):
-        self.buckets = [[] for _ in range(self.size)]
+    def clear_hash_table(self):
+        self.hash_table = [[] for _ in range(self.size)]
 
-    def load_factor(self):
+    def get_load_factor(self):
         return len(self) / self.size
 
-    def display(self):
+    def print_hash_table(self):
         print("Содержимое хеш-таблицы:")
-        for i, bucket in enumerate(self.buckets):
-            if bucket:
-                key, value = bucket
-                v_k = hash(key) % self.size
+        for i, table_row in enumerate(self.hash_table):
+            if table_row:
+                hash_key, hash_value = table_row
+                v_k = hash(hash_key) % self.size
                 h_v = i
-                print(f"Ключ: {key}, Значение: {value}, V(K): {v_k}, h(V): {h_v}")
-        print(f"Коэффициент заполнения: {self.load_factor():.2f}")
+                print(f"Ключ: {hash_key}, Значение: {hash_value}, V(K): {v_k}, h(V): {h_v}")
+        print(f"Коэффициент заполнения: {self.get_load_factor():.2f}")
 
 biology = HashTable()
 
@@ -70,8 +70,8 @@ biology.insert("Митоз", "Процесс деления клетки, в р�
 biology.insert("Экосистема", "Сообщество живых организмов (растений, животных и микробов), "
                               "взаимодействующих друг с другом и с их физической средой.")
 
-print(biology.get("ДНК"))
+print(biology.get_by_key("ДНК"))
 print(len(biology))
-biology.delete("Фотосинтез")
+biology.delete_by_key("Фотосинтез")
 print(len(biology))
-biology.display()
+biology.print_hash_table()
